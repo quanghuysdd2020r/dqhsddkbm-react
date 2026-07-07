@@ -9,11 +9,6 @@ const navItems = [
   { label: "Shop", to: "/shop" },
 ];
 
-const mobileNavItems = [
-  ...navItems,
-  { label: "Sign In", to: "/coming-soon" },
-];
-
 export default function Navbar() {
   const { pathname } = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -102,23 +97,40 @@ export default function Navbar() {
       >
         <div className="min-h-0">
           <div className="mt-5 border-t border-white/10 pb-2 pt-4">
-            <div className="grid gap-2">
-              {mobileNavItems.map((item) => (
+            <div className="overflow-hidden border border-white/10 bg-white/[0.025]">
+              {navItems.map((item, index) => (
                 <NavLink
                   className={({ isActive }) =>
-                    `flex items-center justify-between border border-white/10 bg-white/[0.035] px-4 py-3 text-sm transition-colors hover:bg-white/[0.065] hover:text-white ${
-                      isActive ? "text-white" : "text-white/60"
+                    `group flex items-center justify-between border-b border-white/10 px-4 py-3.5 text-sm transition-colors last:border-b-0 hover:bg-white/[0.055] hover:text-white ${
+                      isActive ? "bg-white/[0.055] text-white" : "text-white/62"
                     }`
                   }
                   end={item.to === "/"}
                   key={item.to}
                   to={item.to}
                 >
-                  <span>{item.label}</span>
-                  <span className="text-white/28">/</span>
+                  <span className="flex items-center gap-3">
+                    <span className="w-5 text-[11px] text-white/28">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span>{item.label}</span>
+                  </span>
+                  <span className="h-px w-5 bg-white/18 transition-all group-hover:w-8 group-hover:bg-white/42" />
                 </NavLink>
               ))}
             </div>
+
+            <NavLink
+              className={({ isActive }) =>
+                `mt-3 flex items-center justify-between bg-white px-4 py-3.5 text-sm font-medium text-[#071f2d] shadow-[0_14px_40px_rgba(0,0,0,0.18)] transition-transform hover:scale-[1.01] ${
+                  isActive ? "opacity-90" : ""
+                }`
+              }
+              to="/coming-soon"
+            >
+              <span>Sign In</span>
+              <span className="text-[#071f2d]/45">Access</span>
+            </NavLink>
           </div>
         </div>
       </div>
