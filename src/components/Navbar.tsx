@@ -10,7 +10,7 @@ const navItems = [
 
 export default function Navbar() {
   const { pathname } = useLocation();
-  const isSignInPage = pathname === "/sign-in";
+  const isComingSoonPage = pathname === "/coming-soon" || pathname === "/sign-in";
 
   return (
     <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#061a25]/35 px-6 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl">
@@ -45,12 +45,12 @@ export default function Navbar() {
           ))}
         </div>
 
-        {isSignInPage ? (
+        {isComingSoonPage ? (
           <div className="hidden w-[5.25rem] sm:block" />
         ) : (
           <Link
             className="liquid-glass rounded-full px-5 py-2.5 text-sm text-white transition-transform hover:scale-[1.03] sm:px-6"
-            to="/sign-in"
+            to="/coming-soon"
           >
             Sign In
           </Link>

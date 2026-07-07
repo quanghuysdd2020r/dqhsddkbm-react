@@ -42,7 +42,7 @@ export default function Home() {
 
         <Link
           className="liquid-glass animate-fade-rise-delay-2 mt-12 cursor-pointer rounded-full px-14 py-5 text-base text-white transition-transform hover:scale-[1.03]"
-          to="/sign-in"
+          to="/coming-soon"
         >
           Focus now
         </Link>
