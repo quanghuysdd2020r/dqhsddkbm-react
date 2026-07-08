@@ -24,11 +24,16 @@ export default function Navbar() {
 
         <Link
           to="/"
-          className="flex flex-col leading-none no-underline"
+          className="flex items-center gap-3 leading-none no-underline"
         >
+          <img
+            alt="dqhsddkbm"
+            className="h-9 w-9 rounded-[12px] object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+            src="/app-icon-192.png"
+          />
           <span
             style={{ fontFamily: "'Instrument Serif', serif" }}
-            className="text-2xl tracking-tight text-white sm:text-3xl"
+            className="hidden text-2xl tracking-tight text-white min-[360px]:block sm:text-3xl"
           >
             dqhsddkbm
           </span>
