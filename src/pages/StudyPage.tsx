@@ -9,11 +9,17 @@ import {
   getFocusStats,
 } from "../lib/focusStorage";
 
-const studySpaces = [
+const studySpaces: Array<{
+  title: string;
+  description: string;
+  meta: string;
+  to?: string;
+}> = [
   {
     title: "Notes",
     description: "Capture ideas, formulas, summaries, and study maps in one calm place.",
-    meta: "Coming soon",
+    meta: "Daily words",
+    to: "/study/notes",
   },
   {
     title: "Flashcards",
@@ -248,6 +254,15 @@ export default function Study() {
               <p className="mt-6 max-w-xl text-sm leading-7 text-white/55 sm:text-base">
                 {space.description}
               </p>
+
+              {space.to ? (
+                <Link
+                  className="mt-8 inline-flex rounded-full border border-white/10 px-5 py-2.5 text-sm text-white/65 transition-colors hover:border-white/24 hover:text-white"
+                  to={space.to}
+                >
+                  Open notes
+                </Link>
+              ) : null}
 
               <div className="mt-8 h-px bg-white/10 transition-colors group-hover:bg-white/20" />
             </article>

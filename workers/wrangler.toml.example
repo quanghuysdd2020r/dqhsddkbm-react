@@ -1,0 +1,15 @@
+name = "dqhsddkbm-vocab-cron"
+main = "onesignal-vocab-cron.ts"
+compatibility_date = "2026-07-08"
+
+# 00:00 UTC = 07:00 Asia/Saigon
+# 12:00 UTC = 19:00 Asia/Saigon
+[triggers]
+crons = ["0 0,12 * * *"]
+
+[vars]
+SITE_URL = "https://dqhsddkbm.shop"
+ONESIGNAL_APP_ID = "your-onesignal-app-id"
+
+# Set this as a secret, not plain text:
+# wrangler secret put ONESIGNAL_REST_API_KEY

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "dqhsddkbm - Let's study",
+  "short_name": "dqhsddkbm",
+  "description": "A quiet personal study space.",
+  "id": "/?homescreen=1",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#071f2d",
+  "theme_color": "#071f2d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
