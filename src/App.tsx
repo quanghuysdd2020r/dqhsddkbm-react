@@ -6,12 +6,14 @@ import Blogs from "./pages/BlogsPage";
 import About from "./pages/AboutPage";
 import Shop from "./pages/ShopPage";
 import ComingSoon from "./pages/ComingSoonPage";
+import Focus from "./pages/FocusPage";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/focus" element={<Focus />} />
         <Route path="/study" element={<Study />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/about" element={<About />} />
