@@ -29,7 +29,7 @@ export default function Navbar() {
           <img
             alt="dqhsddkbm"
             className="h-9 w-9 rounded-[12px] object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
-            src="/app-icon-192.png"
+            src="/app-icon-v2-192.png"
           />
           <span
             style={{ fontFamily: "'Instrument Serif', serif" }}
