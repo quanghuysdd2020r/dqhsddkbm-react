@@ -15,7 +15,6 @@ type OneSignalInstance = {
     setDefaultUrl: (url: string) => void;
   };
   User: {
-    addTag: (key: string, value: string) => void;
     addTags: (tags: Record<string, string>) => void;
     PushSubscription: {
       optedIn: boolean;
@@ -32,12 +31,14 @@ declare global {
   }
 }
 
+const defaultOneSignalAppId = "1a05e3b9-e540-4b4f-b549-710b32b9a17b";
+
 let scriptPromise: Promise<void> | null = null;
 let initPromise: Promise<OneSignalInstance> | null = null;
 
-export const oneSignalAppId = import.meta.env.VITE_ONESIGNAL_APP_ID as
-  | string
-  | undefined;
+export const oneSignalAppId =
+  (import.meta.env.VITE_ONESIGNAL_APP_ID as string | undefined) ||
+  defaultOneSignalAppId;
 
 function loadOneSignalScript() {
   if (scriptPromise) {
@@ -67,7 +68,7 @@ export function isOneSignalConfigured() {
 
 export async function initOneSignal() {
   if (!oneSignalAppId) {
-    throw new Error("Missing VITE_ONESIGNAL_APP_ID.");
+    throw new Error("Missing OneSignal App ID.");
   }
 
   if (initPromise) {
@@ -107,7 +108,7 @@ export async function requestVocabularyNotifications() {
   if (!OneSignal.Notifications.isPushSupported()) {
     return {
       ok: false,
-      message: "Trình duyệt này chưa hỗ trợ web push.",
+      message: "This browser does not support web push.",
     };
   }
 
@@ -124,7 +125,7 @@ export async function requestVocabularyNotifications() {
     ok: OneSignal.Notifications.permission || OneSignal.User.PushSubscription.optedIn,
     message:
       OneSignal.Notifications.permission || OneSignal.User.PushSubscription.optedIn
-        ? "Đã bật thông báo học từ mới."
-        : "Bạn chưa cấp quyền thông báo.",
+        ? "Vocabulary notifications are enabled."
+        : "Notification permission was not granted.",
   };
 }

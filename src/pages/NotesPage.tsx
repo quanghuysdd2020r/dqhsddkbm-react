@@ -33,7 +33,7 @@ export default function Notes() {
       setNotificationStatus(
         error instanceof Error
           ? error.message
-          : "Không thể bật thông báo lúc này.",
+          : "Could not enable notifications right now.",
       );
     } finally {
       setIsRequesting(false);
@@ -130,8 +130,7 @@ export default function Notes() {
 
             {!isOneSignalConfigured() ? (
               <p className="mt-4 text-sm leading-7 text-white/45">
-                OneSignal is scaffolded. Add `VITE_ONESIGNAL_APP_ID` in
-                Cloudflare Pages environment variables to activate it.
+                OneSignal is not configured yet.
               </p>
             ) : null}
 
