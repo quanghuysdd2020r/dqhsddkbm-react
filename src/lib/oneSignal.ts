@@ -28,39 +28,17 @@ type OneSignalDeferredCallback = (oneSignal: OneSignalInstance) => void | Promis
 declare global {
   interface Window {
     OneSignalDeferred?: OneSignalDeferredCallback[];
+    __oneSignalInitPromise?: Promise<OneSignalInstance>;
   }
 }
 
 const defaultOneSignalAppId = "1a05e3b9-e540-4b4f-b549-710b32b9a17b";
 
-let scriptPromise: Promise<void> | null = null;
 let initPromise: Promise<OneSignalInstance> | null = null;
 
 export const oneSignalAppId =
   (import.meta.env.VITE_ONESIGNAL_APP_ID as string | undefined) ||
   defaultOneSignalAppId;
-
-function loadOneSignalScript() {
-  if (scriptPromise) {
-    return scriptPromise;
-  }
-
-  scriptPromise = new Promise((resolve, reject) => {
-    if (document.querySelector('script[src*="OneSignalSDK.page.js"]')) {
-      resolve();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.defer = true;
-    script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Could not load OneSignal SDK."));
-    document.head.appendChild(script);
-  });
-
-  return scriptPromise;
-}
 
 export function isOneSignalConfigured() {
   return Boolean(oneSignalAppId);
@@ -75,29 +53,9 @@ export async function initOneSignal() {
     return initPromise;
   }
 
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  await loadOneSignalScript();
-
-  initPromise = new Promise((resolve, reject) => {
-    window.OneSignalDeferred?.push(async (OneSignal) => {
-      try {
-        await OneSignal.init({
-          appId: oneSignalAppId,
-          allowLocalhostAsSecureOrigin: true,
-          notificationClickHandlerAction: "navigate",
-          notificationClickHandlerMatch: "origin",
-          notifyButton: { enable: false },
-          welcomeNotification: { disable: true },
-        });
-
-        OneSignal.Notifications.setDefaultTitle("dqhsddkbm");
-        OneSignal.Notifications.setDefaultUrl(`${window.location.origin}/study/notes`);
-        resolve(OneSignal);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  });
+  initPromise =
+    window.__oneSignalInitPromise ??
+    Promise.reject(new Error("OneSignal SDK was not queued from index.html."));
 
   return initPromise;
 }
