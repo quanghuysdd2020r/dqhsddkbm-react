@@ -71,20 +71,21 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 bg-[#071f2d]/95 py-24 sm:py-28">
-        <div className="mx-auto max-w-6xl px-6 text-center sm:px-8">
+      <section className="relative z-10 overflow-hidden bg-[#f7d95d] py-24 text-[#071f2d] sm:py-28">
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_38%,rgba(7,31,45,0.06)_100%)]" />
+        <div className="relative mx-auto max-w-6xl px-6 text-center sm:px-8">
           <ScrollReveal>
-            <p className="mb-5 text-xs uppercase tracking-[0.32em] text-white/45">
+            <p className="mb-5 text-xs uppercase tracking-[0.32em] text-[#071f2d]/55">
               Let's study
             </p>
             <h2
               style={{ fontFamily: "'Instrument Serif', serif" }}
-              className="mb-6 text-4xl leading-none text-white sm:text-5xl md:text-6xl"
+              className="mb-6 text-4xl leading-none text-[#071f2d] sm:text-5xl md:text-6xl"
             >
               Designed for modern learners.
             </h2>
 
-            <p className="mx-auto max-w-2xl text-base leading-8 text-gray-300 sm:text-lg">
+            <p className="mx-auto max-w-2xl text-base leading-8 text-[#071f2d]/72 sm:text-lg">
               dqhsddkbm isn't just a website. It's a growing ecosystem where
               students can learn, discover resources, read blogs and shop useful
               study materials.
@@ -93,13 +94,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 overflow-hidden bg-[#f7d95d] px-6 py-24 text-[#071f2d] sm:py-28">
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34),rgba(255,255,255,0)_34%,rgba(7,31,45,0.08)_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-white/45" />
+      <section className="relative z-10 overflow-hidden bg-[#071f2d] px-6 py-24 text-white sm:py-28">
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0)_34%,rgba(247,217,93,0.1)_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-white/12" />
 
         <div className="relative mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <ScrollReveal className="max-w-xl" variant="left">
-            <p className="mb-5 text-xs uppercase tracking-[0.32em] text-[#071f2d]/55">
+            <p className="mb-5 text-xs uppercase tracking-[0.32em] text-white/45">
               Vocabulary push
             </p>
             <h2
@@ -109,13 +110,13 @@ export default function Home() {
               Get noti.
             </h2>
 
-            <p className="max-w-md text-base leading-8 text-[#071f2d]/72 sm:text-lg">
+            <p className="max-w-md text-base leading-8 text-white/70 sm:text-lg">
               Only iPhone for now. Add dqhsddkbm to your Home Screen, then turn
               on daily Russian vocabulary reminders.
             </p>
 
             <button
-              className="mt-9 rounded-full border border-white/55 bg-white/28 px-7 py-3.5 text-sm font-medium text-[#071f2d] shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_18px_60px_rgba(7,31,45,0.16)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/36 disabled:cursor-wait disabled:opacity-70"
+              className="liquid-glass mt-9 rounded-full px-7 py-3.5 text-sm font-medium text-white transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70"
               disabled={isNotificationRequesting}
               onClick={enableNotifications}
               type="button"
@@ -126,13 +127,13 @@ export default function Home() {
             </button>
 
             {notificationStatus ? (
-              <p className="mt-4 text-sm text-[#071f2d]/62">{notificationStatus}</p>
+              <p className="mt-4 text-sm text-white/58">{notificationStatus}</p>
             ) : null}
           </ScrollReveal>
 
           <ScrollReveal className="lg:justify-self-end" delay="short" variant="pop">
             <div className="relative w-full max-w-[34rem]">
-              <div className="absolute inset-x-6 -inset-y-8 rounded-[2.25rem] bg-[#071f2d]/18 blur-3xl" />
+              <div className="absolute inset-x-6 -inset-y-8 rounded-[2.25rem] bg-[#f7d95d]/18 blur-3xl" />
 
               <div className="notification-pop relative rounded-[1.75rem] border border-white/55 bg-white/24 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.48),0_26px_75px_rgba(7,31,45,0.22)] backdrop-blur-2xl sm:p-5">
                 <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(135deg,rgba(255,255,255,0.44),rgba(255,255,255,0.08)_34%,rgba(255,255,255,0.02)_100%)]" />
