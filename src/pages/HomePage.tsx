@@ -130,49 +130,43 @@ export default function Home() {
             ) : null}
           </ScrollReveal>
 
-          <ScrollReveal delay="short" variant="pop">
-            <div className="mx-auto w-full max-w-[23rem] rounded-[3.1rem] border border-white/30 bg-[#071f2d] p-3 shadow-[0_34px_95px_rgba(7,31,45,0.38)] sm:max-w-[25rem] sm:p-4">
-              <div className="relative min-h-[33rem] overflow-hidden rounded-[2.45rem] border border-white/10 bg-[linear-gradient(180deg,#0b3548_0%,#071f2d_55%,#031018_100%)] px-4 pt-3">
-                <div className="mx-auto h-6 w-24 rounded-full bg-black/42" />
-                <div className="absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgba(247,217,93,0.28),rgba(247,217,93,0))]" />
-                <div className="absolute bottom-0 left-1/2 h-56 w-[150%] -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(247,217,93,0.26),rgba(247,217,93,0)_64%)]" />
+          <ScrollReveal className="lg:justify-self-end" delay="short" variant="pop">
+            <div className="relative w-full max-w-[34rem]">
+              <div className="absolute inset-x-6 -inset-y-8 rounded-[2.25rem] bg-[#071f2d]/18 blur-3xl" />
 
-                <div className="relative mt-20">
-                  <div className="notification-pop rounded-[1.65rem] border border-white/35 bg-white/24 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-2xl">
-                    <div className="flex items-center gap-3">
-                      <img
-                        alt="dqhsddkbm app icon"
-                        className="h-10 w-10 rounded-[14px] shadow-[0_10px_30px_rgba(0,0,0,0.22)]"
-                        src="/app-icon-v2-192.png"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-3 text-xs text-white/72">
-                          <span className="font-medium text-white">dqhsddkbm</span>
-                          <span>now</span>
-                        </div>
-                        <p className="mt-0.5 text-[0.8rem] text-white/62">
-                          Russian word of the day
-                        </p>
-                      </div>
-                    </div>
+              <div className="notification-pop relative rounded-[1.75rem] border border-white/55 bg-white/24 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.48),0_26px_75px_rgba(7,31,45,0.22)] backdrop-blur-2xl sm:p-5">
+                <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(135deg,rgba(255,255,255,0.44),rgba(255,255,255,0.08)_34%,rgba(255,255,255,0.02)_100%)]" />
 
-                    <div className="mt-4 border-t border-white/18 pt-4">
-                      <p className="text-lg font-semibold leading-none">мечта</p>
-                      <p className="mt-2 text-sm leading-6 text-white/78">
-                        dream. Example: У меня есть большая мечта.
-                      </p>
+                <div className="relative flex items-center gap-3">
+                  <img
+                    alt="dqhsddkbm app icon"
+                    className="h-10 w-10 rounded-[14px] shadow-[0_10px_30px_rgba(7,31,45,0.22)]"
+                    src="/app-icon-v2-192.png"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3 text-xs text-white/72">
+                      <span className="font-medium text-white">dqhsddkbm</span>
+                      <span>now</span>
                     </div>
+                    <p className="mt-0.5 text-[0.8rem] text-white/64">
+                      Russian word of the day
+                    </p>
                   </div>
                 </div>
 
-                <div className="absolute bottom-7 left-1/2 h-1.5 w-28 -translate-x-1/2 rounded-full bg-white/36" />
+                <div className="relative mt-4 border-t border-white/20 pt-4">
+                  <p className="text-lg font-semibold leading-none">mechta</p>
+                  <p className="mt-2 text-sm leading-6 text-white/80">
+                    dream. Example: I keep one bright dream for today.
+                  </p>
+                </div>
               </div>
             </div>
           </ScrollReveal>
         </div>
       </section>
 
-      <footer className="relative z-10 border-t border-white/12 bg-[#061a25]/58 px-6 py-5 text-center text-sm text-white/55 shadow-[0_-18px_60px_rgba(0,0,0,0.16)] backdrop-blur-2xl">
+      <footer className="footer-glass relative z-10 px-6 py-5 text-center text-sm text-white/58">
         <div className="mx-auto flex max-w-7xl items-center justify-center">
           <span>&copy; 2026 dqhsddkbm. All rights reserved.</span>
         </div>
