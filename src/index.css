@@ -87,6 +87,33 @@ body {
   }
 }
 
+@keyframes notification-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-26px) scale(0.94);
+  }
+
+  62% {
+    opacity: 1;
+    transform: translateY(6px) scale(1.015);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.notification-pop {
+  opacity: 0;
+  transform: translateY(-26px) scale(0.94);
+  transform-origin: top center;
+}
+
+.scroll-reveal[data-visible="true"] .notification-pop {
+  animation: notification-pop 0.78s cubic-bezier(0.18, 0.9, 0.22, 1) 0.18s both;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
