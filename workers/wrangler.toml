@@ -1,0 +1,12 @@
+name = "vocab-noti"
+main = "onesignal-vocab-cron.ts"
+compatibility_date = "2026-07-08"
+
+# 00:00 UTC = 07:00 Asia/Saigon
+# 12:00 UTC = 19:00 Asia/Saigon
+[triggers]
+crons = ["0 0,12 * * *"]
+
+[vars]
+SITE_URL = "https://dqhsddkbm.shop"
+ONESIGNAL_APP_ID = "1a05e3b9-e540-4b4f-b549-710b32b9a17b"
