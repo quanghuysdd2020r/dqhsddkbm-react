@@ -15,7 +15,7 @@ type OneSignalInstance = {
     setDefaultUrl: (url: string) => void;
   };
   User: {
-    addTags: (tags: Record<string, string>) => void;
+    addTags: (tags: Record<string, string>) => void | Promise<void>;
     PushSubscription: {
       optedIn: boolean;
       optIn: () => Promise<void>;
@@ -72,7 +72,7 @@ export async function requestVocabularyNotifications() {
 
   await OneSignal.Notifications.requestPermission();
   await OneSignal.User.PushSubscription.optIn();
-  OneSignal.User.addTags({
+  await OneSignal.User.addTags({
     vocab_notifications: "true",
     vocab_language: "ru",
     vocab_schedule: "07:00,19:00",
