@@ -1,89 +1,97 @@
 type Env = {
   ONESIGNAL_APP_ID: string;
   ONESIGNAL_REST_API_KEY: string;
-  SITE_URL: string;
+  SITE_URL?: string;
 };
 
 type VocabWord = {
-  id: string;
-  russian: string;
-  meaning: string;
-  example: string;
+  ru: string;
+  vi: string;
+  read: string;
 };
 
-const vocabulary: VocabWord[] = [
-  { id: "privet", russian: "привет", meaning: "xin chào", example: "Привет, как дела?" },
-  { id: "spasibo", russian: "спасибо", meaning: "cảm ơn", example: "Спасибо за помощь." },
-  { id: "pozhaluysta", russian: "пожалуйста", meaning: "làm ơn / không có gì", example: "Пожалуйста, повторите." },
-  { id: "utro", russian: "утро", meaning: "buổi sáng", example: "Утро тихое." },
-  { id: "vecher", russian: "вечер", meaning: "buổi tối", example: "Вечером я учусь." },
-  { id: "kniga", russian: "книга", meaning: "quyển sách", example: "Это хорошая книга." },
-  { id: "urok", russian: "урок", meaning: "bài học", example: "Урок начинается утром." },
-  { id: "slovo", russian: "слово", meaning: "từ", example: "Новое слово легко запомнить." },
-  { id: "voda", russian: "вода", meaning: "nước", example: "Я пью воду." },
-  { id: "chai", russian: "чай", meaning: "trà", example: "Чай горячий." },
-  { id: "dom", russian: "дом", meaning: "ngôi nhà", example: "Мой дом рядом." },
-  { id: "drug", russian: "друг", meaning: "người bạn", example: "Мой друг учит русский." },
-  { id: "semya", russian: "семья", meaning: "gia đình", example: "Моя семья дома." },
-  { id: "gorod", russian: "город", meaning: "thành phố", example: "Город красивый." },
-  { id: "shkola", russian: "школа", meaning: "trường học", example: "Школа открыта." },
-  { id: "rabota", russian: "работа", meaning: "công việc", example: "Работа важная." },
-  { id: "segodnya", russian: "сегодня", meaning: "hôm nay", example: "Сегодня я учу пять слов." },
-  { id: "zavtra", russian: "завтра", meaning: "ngày mai", example: "Завтра будет новый урок." },
-  { id: "khorosho", russian: "хорошо", meaning: "tốt", example: "Я хорошо понимаю." },
-  { id: "medlenno", russian: "медленно", meaning: "chậm", example: "Говорите медленно, пожалуйста." },
-  { id: "ponimayu", russian: "понимаю", meaning: "tôi hiểu", example: "Я понимаю это слово." },
-  { id: "uchus", russian: "учусь", meaning: "tôi học", example: "Я учусь каждый день." },
-  { id: "lyublyu", russian: "люблю", meaning: "tôi thích / tôi yêu", example: "Я люблю русский язык." },
-  { id: "yazyk", russian: "язык", meaning: "ngôn ngữ", example: "Русский язык красивый." },
-  { id: "vremya", russian: "время", meaning: "thời gian", example: "Время учиться." },
-  { id: "tsel", russian: "цель", meaning: "mục tiêu", example: "Моя цель ясная." },
-  { id: "pamyat", russian: "память", meaning: "trí nhớ", example: "Память становится сильнее." },
-  { id: "spokoyno", russian: "спокойно", meaning: "bình tĩnh", example: "Учись спокойно." },
-  { id: "nachalo", russian: "начало", meaning: "sự bắt đầu", example: "Это хорошее начало." },
-  { id: "uspek", russian: "успех", meaning: "thành công", example: "Успех приходит тихо." },
+const VOCABS: VocabWord[] = [
+  { ru: "мечта", vi: "giấc mơ", read: "miếc-ta" },
+  { ru: "город", vi: "thành phố", read: "gó-rợt" },
+  { ru: "друг", vi: "người bạn", read: "drúc" },
+  { ru: "книга", vi: "quyển sách", read: "kní-ga" },
+  { ru: "учитель", vi: "giáo viên", read: "u-chí-chiên" },
 ];
 
-const pad = (value: number) => String(value).padStart(2, "0");
+export default {
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(sendVocab(env));
+  },
 
-function getDateKey(date = new Date()) {
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+  async fetch(_request: Request, env: Env) {
+    try {
+      const result = await sendVocab(env);
+
+      return new Response(result, {
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        status: 200,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+
+      return new Response(`Worker lỗi: ${message}`, {
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        status: 500,
+      });
+    }
+  },
+};
+
+async function sendVocab(env: Env) {
+  const appId = String(env.ONESIGNAL_APP_ID || "").trim();
+  const apiKey = String(env.ONESIGNAL_REST_API_KEY || "").trim();
+  const siteUrl = String(env.SITE_URL || "https://dqhsddkbm.shop").replace(/\/$/, "");
+
+  if (!appId) {
+    throw new Error("Missing ONESIGNAL_APP_ID");
+  }
+
+  if (!apiKey) {
+    throw new Error("Missing ONESIGNAL_REST_API_KEY");
+  }
+
+  const slot = getVietnamSlot();
+  const words = getTodayWords().slice(slot === "morning" ? 0 : 3, slot === "morning" ? 3 : 5);
+  const results = [];
+
+  for (const word of words) {
+    results.push(await sendOneSignalNotification({ apiKey, appId, siteUrl, word }));
+  }
+
+  const sentWords = words.map((word) => `${word.ru} = ${word.vi} (${word.read})`).join("\n");
+
+  return `Đã gửi ${words.length} notification\nKhung giờ: ${
+    slot === "morning" ? "sáng" : "tối"
+  }\n${sentWords}\n\nOneSignal IDs:\n${results.map((result) => result.id || "(no id)").join("\n")}`;
 }
 
-function hashDateKey(dateKey: string) {
-  return dateKey.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
-}
-
-function getDailyVocabulary(date = new Date()) {
-  const dateKey = getDateKey(date);
-  const startIndex = hashDateKey(dateKey) % vocabulary.length;
-
-  return Array.from({ length: 5 }, (_, index) => {
-    return vocabulary[(startIndex + index * 7) % vocabulary.length];
-  });
-}
-
-async function sendVocabularyNotification(
-  env: Env,
-  word: VocabWord,
-  dateKey: string,
-  slot: "morning" | "evening",
-  delayMinutes: number,
-) {
-  const siteUrl = env.SITE_URL.replace(/\/$/, "");
-  const url = `${siteUrl}/study/notes?word=${word.id}&day=${dateKey}`;
-
-  const response = await fetch("https://api.onesignal.com/notifications", {
+async function sendOneSignalNotification({
+  apiKey,
+  appId,
+  siteUrl,
+  word,
+}: {
+  apiKey: string;
+  appId: string;
+  siteUrl: string;
+  word: VocabWord;
+}) {
+  const response = await fetch("https://api.onesignal.com/notifications?c=push", {
     body: JSON.stringify({
-      app_id: env.ONESIGNAL_APP_ID,
+      app_id: appId,
       contents: {
-        en: `${word.example} — ${word.meaning}`,
+        en: `${word.ru} = ${word.vi} (${word.read})`,
       },
       data: {
-        day: dateKey,
-        source: "lingohut",
-        slot,
-        wordId: word.id,
+        ru: word.ru,
+        vi: word.vi,
+        read: word.read,
+        source: "dqhsddkbm-vocab-worker",
       },
       filters: [
         {
@@ -94,52 +102,71 @@ async function sendVocabularyNotification(
         },
       ],
       headings: {
-        en: `${word.russian}`,
+        en: "Từ tiếng Nga hôm nay",
       },
-      name: `Russian vocab ${dateKey} ${slot} ${word.id}`,
-      send_after: new Date(Date.now() + delayMinutes * 60 * 1000).toISOString(),
       target_channel: "push",
-      url,
+      web_url: `${siteUrl}/study/notes`,
     }),
     headers: {
-      Authorization: `Key ${env.ONESIGNAL_REST_API_KEY}`,
+      Authorization: `Key ${apiKey}`,
       "Content-Type": "application/json; charset=utf-8",
     },
     method: "POST",
   });
 
-  if (!response.ok) {
-    throw new Error(`OneSignal failed: ${response.status} ${await response.text()}`);
+  const text = await response.text();
+  const result = parseOneSignalResponse(text);
+
+  if (!response.ok || hasOneSignalErrors(result)) {
+    throw new Error(`OneSignal trả lỗi: ${text}`);
   }
 
-  return response.json();
+  return result;
 }
 
-async function sendDailyVocabulary(env: Env, now = new Date()) {
-  const dateKey = getDateKey(now);
-  const dailyWords = getDailyVocabulary(now);
-  const slot = now.getUTCHours() < 6 ? "morning" : "evening";
-  const words = slot === "morning" ? dailyWords.slice(0, 3) : dailyWords.slice(3);
-
-  return Promise.all(
-    words.map((word, index) => {
-      return sendVocabularyNotification(env, word, dateKey, slot, index * 3);
-    }),
-  );
+function parseOneSignalResponse(text: string) {
+  try {
+    return JSON.parse(text) as { id?: string; errors?: unknown };
+  } catch {
+    return { errors: [`Invalid JSON response: ${text}`] };
+  }
 }
 
-export default {
-  async fetch(_request: Request, env: Env) {
-    const today = getDailyVocabulary();
+function hasOneSignalErrors(result: { errors?: unknown }) {
+  if (!result.errors) {
+    return false;
+  }
 
-    return Response.json({
-      morning: today.slice(0, 3),
-      evening: today.slice(3),
-      siteUrl: env.SITE_URL,
-    });
-  },
+  return Array.isArray(result.errors) ? result.errors.length > 0 : true;
+}
 
-  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil(sendDailyVocabulary(env));
-  },
-};
+function getTodayWords(date = new Date()) {
+  const dateKey = getVietnamDateKey(date);
+  const start = hash(dateKey) % VOCABS.length;
+
+  return Array.from({ length: 5 }, (_, index) => {
+    return VOCABS[(start + index) % VOCABS.length];
+  });
+}
+
+function getVietnamSlot(date = new Date()) {
+  const vietnamHour = getVietnamHour(date);
+
+  return vietnamHour < 12 ? "morning" : "evening";
+}
+
+function getVietnamHour(date = new Date()) {
+  const vietnamDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+
+  return vietnamDate.getUTCHours();
+}
+
+function getVietnamDateKey(date = new Date()) {
+  const vietnamDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+
+  return vietnamDate.toISOString().slice(0, 10);
+}
+
+function hash(text: string) {
+  return text.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}

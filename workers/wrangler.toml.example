@@ -9,7 +9,7 @@ crons = ["0 0,12 * * *"]
 
 [vars]
 SITE_URL = "https://dqhsddkbm.shop"
-ONESIGNAL_APP_ID = "your-onesignal-app-id"
+ONESIGNAL_APP_ID = "1a05e3b9-e540-4b4f-b549-710b32b9a17b"
 
 # Set this as a secret, not plain text:
 # wrangler secret put ONESIGNAL_REST_API_KEY
