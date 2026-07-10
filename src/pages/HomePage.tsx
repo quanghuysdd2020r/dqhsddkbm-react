@@ -39,12 +39,10 @@ export default function Home() {
           <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4" />
         </video>
 
-        <div
-          className="relative z-10 flex max-w-7xl flex-col items-center"
-        >
+        <div className="relative z-10 flex w-full max-w-7xl flex-col items-center">
           <h1
             style={{ fontFamily: "'Instrument Serif', serif" }}
-            className="animate-fade-rise max-w-[22rem] text-4xl font-normal leading-[0.98] tracking-[-0.5px] sm:max-w-7xl sm:text-7xl md:text-8xl"
+            className="animate-fade-rise mx-auto max-w-[19rem] text-[2.85rem] font-normal leading-[0.98] sm:max-w-7xl sm:text-7xl md:text-8xl"
           >
             Where{" "}
             <em className="not-italic text-gray-400">
@@ -56,7 +54,7 @@ export default function Home() {
             </em>
           </h1>
 
-          <p className="animate-fade-rise-delay mt-7 max-w-[21rem] text-sm leading-7 text-gray-300 sm:mt-8 sm:max-w-2xl sm:text-lg sm:leading-relaxed">
+          <p className="animate-fade-rise-delay mx-auto mt-7 w-full max-w-[18.75rem] text-[0.82rem] leading-7 text-gray-300 sm:mt-8 sm:max-w-2xl sm:text-lg sm:leading-relaxed">
             We're designing tools for deep thinkers, bold creators, and quiet
             rebels. Amid the chaos, we build digital spaces for sharp focus and
             inspired work.

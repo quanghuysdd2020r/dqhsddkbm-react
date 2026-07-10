@@ -9,6 +9,12 @@ export default defineConfig({
     tailwindcss(),
   ],
 
+  server: {
+    watch: {
+      ignored: ["**/work/**"],
+    },
+  },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
