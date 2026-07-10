@@ -2,6 +2,7 @@ type Env = {
   ONESIGNAL_APP_ID: string;
   ONESIGNAL_REST_API_KEY: string;
   SITE_URL?: string;
+  USE_VOCAB_TAG_FILTER?: string;
 };
 
 type VocabWord = {
@@ -57,10 +58,13 @@ async function sendVocab(env: Env) {
 
   const slot = getVietnamSlot();
   const words = getTodayWords().slice(slot === "morning" ? 0 : 3, slot === "morning" ? 3 : 5);
+  const useTagFilter = String(env.USE_VOCAB_TAG_FILTER || "").trim() === "true";
   const results = [];
 
   for (const word of words) {
-    results.push(await sendOneSignalNotification({ apiKey, appId, siteUrl, word }));
+    results.push(
+      await sendOneSignalNotification({ apiKey, appId, siteUrl, useTagFilter, word }),
+    );
   }
 
   const sentWords = words.map((word) => `${word.ru} = ${word.vi} (${word.read})`).join("\n");
@@ -74,13 +78,30 @@ async function sendOneSignalNotification({
   apiKey,
   appId,
   siteUrl,
+  useTagFilter,
   word,
 }: {
   apiKey: string;
   appId: string;
   siteUrl: string;
+  useTagFilter: boolean;
   word: VocabWord;
 }) {
+  const target = useTagFilter
+    ? {
+        filters: [
+          {
+            field: "tag",
+            key: "vocab_notifications",
+            relation: "=",
+            value: "true",
+          },
+        ],
+      }
+    : {
+        included_segments: ["Subscribed Users"],
+      };
+
   const response = await fetch("https://api.onesignal.com/notifications?c=push", {
     body: JSON.stringify({
       app_id: appId,
@@ -93,17 +114,10 @@ async function sendOneSignalNotification({
         read: word.read,
         source: "dqhsddkbm-vocab-worker",
       },
-      filters: [
-        {
-          field: "tag",
-          key: "vocab_notifications",
-          relation: "=",
-          value: "true",
-        },
-      ],
       headings: {
         en: "Từ tiếng Nga hôm nay",
       },
+      ...target,
       target_channel: "push",
       web_url: `${siteUrl}/study/notes`,
     }),
