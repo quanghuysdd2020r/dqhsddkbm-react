@@ -8,6 +8,7 @@ import Shop from "./pages/ShopPage";
 import ComingSoon from "./pages/ComingSoonPage";
 import Focus from "./pages/FocusPage";
 import Notes from "./pages/NotesPage";
+import SignIn from "./pages/SignInPage";
 
 export default function App() {
   return (
@@ -21,7 +22,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/coming-soon" element={<ComingSoon />} />
-        <Route path="/sign-in" element={<ComingSoon />} />
+        <Route path="/sign-in" element={<SignIn />} />
       </Routes>
     </BrowserRouter>
   );

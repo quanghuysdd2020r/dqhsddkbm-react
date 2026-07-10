@@ -12,7 +12,8 @@ const navItems = [
 export default function Navbar() {
   const { pathname } = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isComingSoonPage = pathname === "/coming-soon" || pathname === "/sign-in";
+  const isAuthPage = pathname === "/sign-in";
+  const isComingSoonPage = pathname === "/coming-soon";
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -56,12 +57,12 @@ export default function Navbar() {
           ))}
         </div>
 
-        {isComingSoonPage ? (
+        {isComingSoonPage || isAuthPage ? (
           <div className="hidden w-[5.25rem] md:block" />
         ) : (
           <Link
             className="liquid-glass hidden rounded-full px-5 py-2.5 text-sm text-white transition-transform hover:scale-[1.03] sm:px-6 md:inline-flex"
-            to="/coming-soon"
+            to="/sign-in"
           >
             Sign In
           </Link>
@@ -125,17 +126,19 @@ export default function Navbar() {
               ))}
             </div>
 
-            <NavLink
-              className={({ isActive }) =>
-                `mt-3 flex items-center justify-between bg-white px-4 py-3.5 text-sm font-medium text-[#071f2d] shadow-[0_14px_40px_rgba(0,0,0,0.18)] transition-transform hover:scale-[1.01] ${
-                  isActive ? "opacity-90" : ""
-                }`
-              }
-              to="/coming-soon"
-            >
-              <span>Sign In</span>
-              <span className="text-[#071f2d]/45">Access</span>
-            </NavLink>
+            {!isAuthPage ? (
+              <NavLink
+                className={({ isActive }) =>
+                  `mt-3 flex items-center justify-between bg-white px-4 py-3.5 text-sm font-medium text-[#071f2d] shadow-[0_14px_40px_rgba(0,0,0,0.18)] transition-transform hover:scale-[1.01] ${
+                    isActive ? "opacity-90" : ""
+                  }`
+                }
+                to="/sign-in"
+              >
+                <span>Sign In</span>
+                <span className="text-[#071f2d]/45">Access</span>
+              </NavLink>
+            ) : null}
           </div>
         </div>
       </div>
