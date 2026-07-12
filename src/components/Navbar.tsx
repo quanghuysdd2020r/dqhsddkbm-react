@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { Link, NavLink, useLocation } from "react-router-dom";
+
+import { supabase } from "../lib/supabase";
 
 const navItems = [
   { label: "Home", to: "/" },
@@ -12,12 +15,71 @@ const navItems = [
 export default function Navbar() {
   const { pathname } = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const isAuthPage = pathname === "/sign-in";
   const isComingSoonPage = pathname === "/coming-soon";
+  const nickname =
+    typeof session?.user.user_metadata?.nickname === "string"
+      ? session.user.user_metadata.nickname
+      : "";
+  const displayName = nickname || session?.user.email || "User";
+  const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "U";
 
   useEffect(() => {
     setIsMenuOpen(false);
+    setIsAccountOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  async function handleSignOut() {
+    if (!supabase) {
+      return;
+    }
+
+    await supabase.auth.signOut();
+    setIsAccountOpen(false);
+    setIsMenuOpen(false);
+  }
+
+  const accountMenu = session ? (
+    <div className="absolute right-0 top-[calc(100%+0.75rem)] w-56 border border-white/12 bg-[#061a25]/82 p-2 text-sm shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-2xl">
+      <div className="border-b border-white/10 px-3 py-3">
+        <p className="truncate text-white">{displayName}</p>
+        <p className="mt-1 truncate text-xs text-white/42">{session.user.email}</p>
+      </div>
+      <Link
+        className="mt-2 flex items-center justify-between px-3 py-3 text-white/68 transition-colors hover:bg-white/[0.055] hover:text-white"
+        to="/profile"
+      >
+        <span>Profile</span>
+        <span className="h-px w-5 bg-white/22" />
+      </Link>
+      <button
+        className="flex w-full items-center justify-between px-3 py-3 text-left text-white/68 transition-colors hover:bg-white/[0.055] hover:text-white"
+        onClick={handleSignOut}
+        type="button"
+      >
+        <span>Sign out</span>
+        <span className="text-white/30">Exit</span>
+      </button>
+    </div>
+  ) : null;
 
   return (
     <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#061a25]/35 px-6 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl">
@@ -57,7 +119,20 @@ export default function Navbar() {
           ))}
         </div>
 
-        {isComingSoonPage || isAuthPage ? (
+        {session ? (
+          <div className="relative hidden md:block">
+            <button
+              aria-expanded={isAccountOpen}
+              aria-label="Open account menu"
+              className="liquid-glass flex h-11 w-11 items-center justify-center rounded-full text-sm font-medium text-white transition-transform hover:scale-[1.03]"
+              onClick={() => setIsAccountOpen((current) => !current)}
+              type="button"
+            >
+              {avatarInitial}
+            </button>
+            {isAccountOpen ? accountMenu : null}
+          </div>
+        ) : isComingSoonPage || isAuthPage ? (
           <div className="hidden w-[5.25rem] md:block" />
         ) : (
           <Link
@@ -126,7 +201,31 @@ export default function Navbar() {
               ))}
             </div>
 
-            {!isAuthPage ? (
+            {session ? (
+              <div className="mt-3 grid gap-2">
+                <NavLink
+                  className={({ isActive }) =>
+                    `flex items-center justify-between bg-white px-4 py-3.5 text-sm font-medium text-[#071f2d] shadow-[0_14px_40px_rgba(0,0,0,0.18)] transition-transform hover:scale-[1.01] ${
+                      isActive ? "opacity-90" : ""
+                    }`
+                  }
+                  to="/profile"
+                >
+                  <span>Profile</span>
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#071f2d] text-xs text-white">
+                    {avatarInitial}
+                  </span>
+                </NavLink>
+                <button
+                  className="flex items-center justify-between border border-white/10 px-4 py-3.5 text-sm text-white/65 transition-colors hover:bg-white/[0.055] hover:text-white"
+                  onClick={handleSignOut}
+                  type="button"
+                >
+                  <span>Sign out</span>
+                  <span className="text-white/30">Exit</span>
+                </button>
+              </div>
+            ) : !isAuthPage ? (
               <NavLink
                 className={({ isActive }) =>
                   `mt-3 flex items-center justify-between bg-white px-4 py-3.5 text-sm font-medium text-[#071f2d] shadow-[0_14px_40px_rgba(0,0,0,0.18)] transition-transform hover:scale-[1.01] ${

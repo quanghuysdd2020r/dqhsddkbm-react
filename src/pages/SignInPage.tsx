@@ -1,15 +1,47 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
+import { Link } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 
-type AuthMode = "sign-in" | "sign-up";
+type AuthMode = "sign-in" | "sign-up" | "forgot";
+
+function EyeIcon({ isOpen }: { isOpen: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      {isOpen ? (
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+      ) : (
+        <path
+          d="M4 4l16 16"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="1.8"
+        />
+      )}
+    </svg>
+  );
+}
 
 export default function SignIn() {
   const [mode, setMode] = useState<AuthMode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +62,12 @@ export default function SignIn() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  function switchMode(nextMode: AuthMode) {
+    setMode(nextMode);
+    setMessage(null);
+    setPassword("");
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -41,6 +79,20 @@ export default function SignIn() {
     setIsSubmitting(true);
     setMessage(null);
 
+    if (mode === "forgot") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/profile`,
+      });
+
+      setMessage(
+        error
+          ? error.message
+          : "Password reset link sent. Check your email, then open Profile to set a new password.",
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
     const authRequest =
       mode === "sign-in"
         ? supabase.auth.signInWithPassword({ email, password })
@@ -48,6 +100,9 @@ export default function SignIn() {
             email,
             password,
             options: {
+              data: {
+                nickname: nickname.trim(),
+              },
               emailRedirectTo: `${window.location.origin}/sign-in`,
             },
           });
@@ -96,8 +151,8 @@ export default function SignIn() {
               Sign in to keep your study space close.
             </h1>
             <p className="animate-fade-rise-delay mt-8 max-w-2xl text-base leading-8 text-white/62 sm:text-lg">
-              Authentication is powered by Supabase. Dashboard and saved study
-              data will attach to this account as the product grows.
+              Your nickname and account settings stay with Supabase. Study data
+              can be synced into this account later.
             </p>
           </div>
 
@@ -111,19 +166,27 @@ export default function SignIn() {
                   style={{ fontFamily: "'Instrument Serif', serif" }}
                   className="mt-4 text-4xl font-normal text-white"
                 >
-                  {session.user.email}
+                  {session.user.user_metadata?.nickname || session.user.email}
                 </h2>
                 <p className="mt-5 text-sm leading-7 text-white/52">
-                  Your account is active. The next step is syncing focus history
-                  and study notes from local storage into Supabase.
+                  Your account is active. Open Profile to edit your nickname or
+                  change your password.
                 </p>
-                <button
-                  className="mt-8 rounded-full bg-white px-7 py-3.5 text-sm font-medium text-[#071f2d] transition hover:scale-[1.02]"
-                  onClick={handleSignOut}
-                  type="button"
-                >
-                  Sign out
-                </button>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    className="rounded-full bg-white px-7 py-3.5 text-center text-sm font-medium text-[#071f2d] transition hover:scale-[1.02]"
+                    to="/profile"
+                  >
+                    Open profile
+                  </Link>
+                  <button
+                    className="rounded-full border border-white/12 px-7 py-3.5 text-sm text-white/70 transition-colors hover:border-white/24 hover:text-white"
+                    onClick={handleSignOut}
+                    type="button"
+                  >
+                    Sign out
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
@@ -134,7 +197,7 @@ export default function SignIn() {
                         ? "bg-white text-[#071f2d]"
                         : "text-white/55 hover:text-white"
                     }`}
-                    onClick={() => setMode("sign-in")}
+                    onClick={() => switchMode("sign-in")}
                     type="button"
                   >
                     Sign in
@@ -145,12 +208,31 @@ export default function SignIn() {
                         ? "bg-white text-[#071f2d]"
                         : "text-white/55 hover:text-white"
                     }`}
-                    onClick={() => setMode("sign-up")}
+                    onClick={() => switchMode("sign-up")}
                     type="button"
                   >
                     Sign up
                   </button>
                 </div>
+
+                {mode === "sign-up" ? (
+                  <>
+                    <label className="mt-7 block text-sm text-white/48" htmlFor="nickname">
+                      Nickname
+                    </label>
+                    <input
+                      autoComplete="nickname"
+                      className="mt-2 w-full border border-white/10 bg-white/[0.055] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/24 focus:border-white/28"
+                      id="nickname"
+                      maxLength={32}
+                      onChange={(event) => setNickname(event.target.value)}
+                      placeholder="Your display name"
+                      required
+                      type="text"
+                      value={nickname}
+                    />
+                  </>
+                ) : null}
 
                 <label className="mt-7 block text-sm text-white/48" htmlFor="email">
                   Email
@@ -166,20 +248,45 @@ export default function SignIn() {
                   value={email}
                 />
 
-                <label className="mt-5 block text-sm text-white/48" htmlFor="password">
-                  Password
-                </label>
-                <input
-                  autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
-                  className="mt-2 w-full border border-white/10 bg-white/[0.055] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/24 focus:border-white/28"
-                  id="password"
-                  minLength={6}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="At least 6 characters"
-                  required
-                  type="password"
-                  value={password}
-                />
+                {mode !== "forgot" ? (
+                  <>
+                    <div className="mt-5 flex items-center justify-between gap-4">
+                      <label className="block text-sm text-white/48" htmlFor="password">
+                        Password
+                      </label>
+                      <button
+                        className="text-xs text-white/42 transition-colors hover:text-white"
+                        onClick={() => switchMode("forgot")}
+                        type="button"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div className="mt-2 flex border border-white/10 bg-white/[0.055] focus-within:border-white/28">
+                      <input
+                        autoComplete={
+                          mode === "sign-in" ? "current-password" : "new-password"
+                        }
+                        className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/24"
+                        id="password"
+                        minLength={6}
+                        onChange={(event) => setPassword(event.target.value)}
+                        placeholder="At least 6 characters"
+                        required
+                        type={isPasswordVisible ? "text" : "password"}
+                        value={password}
+                      />
+                      <button
+                        aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                        className="flex w-12 items-center justify-center text-white/45 transition-colors hover:text-white"
+                        onClick={() => setIsPasswordVisible((current) => !current)}
+                        type="button"
+                      >
+                        <EyeIcon isOpen={isPasswordVisible} />
+                      </button>
+                    </div>
+                  </>
+                ) : null}
 
                 <button
                   className="mt-7 w-full rounded-full bg-white px-7 py-3.5 text-sm font-medium text-[#071f2d] transition hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60"
@@ -190,8 +297,20 @@ export default function SignIn() {
                     ? "Working..."
                     : mode === "sign-in"
                       ? "Sign in"
-                      : "Create account"}
+                      : mode === "sign-up"
+                        ? "Create account"
+                        : "Send reset link"}
                 </button>
+
+                {mode === "forgot" ? (
+                  <button
+                    className="mt-4 w-full text-sm text-white/45 transition-colors hover:text-white"
+                    onClick={() => switchMode("sign-in")}
+                    type="button"
+                  >
+                    Back to sign in
+                  </button>
+                ) : null}
 
                 {!isSupabaseConfigured ? (
                   <p className="mt-4 text-sm leading-7 text-[#f7d95d]/80">

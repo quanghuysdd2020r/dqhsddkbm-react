@@ -9,6 +9,7 @@ import ComingSoon from "./pages/ComingSoonPage";
 import Focus from "./pages/FocusPage";
 import Notes from "./pages/NotesPage";
 import SignIn from "./pages/SignInPage";
+import Profile from "./pages/ProfilePage";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/shop" element={<Shop />} />
         <Route path="/coming-soon" element={<ComingSoon />} />
         <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );
