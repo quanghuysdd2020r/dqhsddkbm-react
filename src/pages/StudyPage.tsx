@@ -11,29 +11,24 @@ import {
 
 const studySpaces: Array<{
   title: string;
-  description: string;
   meta: string;
   to?: string;
 }> = [
   {
     title: "Notes",
-    description: "Capture ideas, formulas, summaries, and study maps in one calm place.",
     meta: "Daily words",
     to: "/study/notes",
   },
   {
     title: "Flashcards",
-    description: "Turn hard concepts into quick review sessions for active recall.",
     meta: "Planned",
   },
   {
     title: "Lessons",
-    description: "Follow focused learning paths with clean structure and zero noise.",
     meta: "Drafting",
   },
   {
     title: "Downloads",
-    description: "Collect templates, worksheets, and resources for offline study.",
     meta: "Soon",
   },
 ];
@@ -89,6 +84,31 @@ export default function Study() {
                 Study now keeps your focus history in this browser, so every
                 completed block can become a small visible win.
               </p>
+
+              <div className="animate-fade-rise-delay-2 mt-9 flex flex-wrap gap-3">
+                {studySpaces.map((space) =>
+                  space.to ? (
+                    <Link
+                      className="liquid-glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-sm text-white transition-transform hover:scale-[1.03] sm:px-6"
+                      key={space.title}
+                      to={space.to}
+                    >
+                      <span>{space.title}</span>
+                      <span className="text-xs text-white/42">{space.meta}</span>
+                    </Link>
+                  ) : (
+                    <button
+                      className="liquid-glass inline-flex cursor-not-allowed items-center gap-3 rounded-full px-5 py-2.5 text-sm text-white/58 opacity-70 sm:px-6"
+                      disabled
+                      key={space.title}
+                      type="button"
+                    >
+                      <span>{space.title}</span>
+                      <span className="text-xs text-white/36">{space.meta}</span>
+                    </button>
+                  ),
+                )}
+              </div>
             </div>
 
             <div className="animate-fade-rise-delay liquid-glass rounded-[24px] px-6 py-6">
@@ -229,44 +249,6 @@ export default function Study() {
               )}
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="px-6 pb-24">
-        <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-2">
-          {studySpaces.map((space) => (
-            <article
-              className="group border border-white/10 bg-white/[0.035] p-6 backdrop-blur-sm transition-colors hover:bg-white/[0.055]"
-              key={space.title}
-            >
-              <div className="flex items-start justify-between gap-6">
-                <h2
-                  style={{ fontFamily: "'Instrument Serif', serif" }}
-                  className="text-4xl font-normal text-white"
-                >
-                  {space.title}
-                </h2>
-                <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/45">
-                  {space.meta}
-                </span>
-              </div>
-
-              <p className="mt-6 max-w-xl text-sm leading-7 text-white/55 sm:text-base">
-                {space.description}
-              </p>
-
-              {space.to ? (
-                <Link
-                  className="mt-8 inline-flex rounded-full border border-white/10 px-5 py-2.5 text-sm text-white/65 transition-colors hover:border-white/24 hover:text-white"
-                  to={space.to}
-                >
-                  Open notes
-                </Link>
-              ) : null}
-
-              <div className="mt-8 h-px bg-white/10 transition-colors group-hover:bg-white/20" />
-            </article>
-          ))}
         </div>
       </section>
 
