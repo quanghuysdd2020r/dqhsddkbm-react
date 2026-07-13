@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
+import { isEmailConfirmed } from "../lib/profiles";
 import { supabase } from "../lib/supabase";
 
 const navItems = [
@@ -19,11 +20,12 @@ export default function Navbar() {
   const [session, setSession] = useState<Session | null>(null);
   const isAuthPage = pathname === "/sign-in";
   const isComingSoonPage = pathname === "/coming-soon";
+  const activeSession = session && isEmailConfirmed(session) ? session : null;
   const nickname =
-    typeof session?.user.user_metadata?.nickname === "string"
-      ? session.user.user_metadata.nickname
+    typeof activeSession?.user.user_metadata?.nickname === "string"
+      ? activeSession.user.user_metadata.nickname
       : "";
-  const displayName = nickname || session?.user.email || "User";
+  const displayName = nickname || activeSession?.user.email || "User";
   const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "U";
 
   useEffect(() => {
@@ -57,11 +59,13 @@ export default function Navbar() {
     setIsMenuOpen(false);
   }
 
-  const accountMenu = session ? (
+  const accountMenu = activeSession ? (
     <div className="absolute right-0 top-[calc(100%+0.75rem)] w-56 border border-white/12 bg-[#061a25]/82 p-2 text-sm shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-2xl">
       <div className="border-b border-white/10 px-3 py-3">
         <p className="truncate text-white">{displayName}</p>
-        <p className="mt-1 truncate text-xs text-white/42">{session.user.email}</p>
+        <p className="mt-1 truncate text-xs text-white/42">
+          {activeSession.user.email}
+        </p>
       </div>
       <Link
         className="mt-2 flex items-center justify-between px-3 py-3 text-white/68 transition-colors hover:bg-white/[0.055] hover:text-white"
@@ -119,7 +123,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        {session ? (
+        {activeSession ? (
           <div className="relative hidden md:block">
             <button
               aria-expanded={isAccountOpen}
@@ -201,7 +205,7 @@ export default function Navbar() {
               ))}
             </div>
 
-            {session ? (
+            {activeSession ? (
               <div className="mt-3 grid gap-2">
                 <NavLink
                   className={({ isActive }) =>

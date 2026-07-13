@@ -3,6 +3,12 @@ import type { Session } from "@supabase/supabase-js";
 import { Link } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
+import {
+  checkNicknameAvailability,
+  isEmailConfirmed,
+  saveUserProfile,
+  validateNickname,
+} from "../lib/profiles";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 
 type AuthMode = "sign-in" | "sign-up" | "forgot";
@@ -45,6 +51,7 @@ export default function SignIn() {
   const [session, setSession] = useState<Session | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const activeSession = session && isEmailConfirmed(session) ? session : null;
 
   useEffect(() => {
     if (!supabase) {
@@ -93,30 +100,82 @@ export default function SignIn() {
       return;
     }
 
-    const authRequest =
-      mode === "sign-in"
-        ? supabase.auth.signInWithPassword({ email, password })
-        : supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                nickname: nickname.trim(),
-              },
-              emailRedirectTo: `${window.location.origin}/sign-in`,
-            },
-          });
+    if (mode === "sign-in") {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    const { error } = await authRequest;
+      if (error) {
+        setMessage(error.message);
+      } else if (data.session && !isEmailConfirmed(data.session)) {
+        await supabase.auth.signOut();
+        setMessage("Check your email and activate your account before signing in.");
+      } else {
+        setMessage("Signed in.");
+        setPassword("");
+      }
+
+      setIsSubmitting(false);
+      return;
+    }
+
+    const validation = validateNickname(nickname);
+
+    if (!validation.ok) {
+      setMessage(validation.message);
+      setIsSubmitting(false);
+      return;
+    }
+
+    const availability = await checkNicknameAvailability(validation.nickname);
+
+    if (availability.error) {
+      setMessage("Profile table is not ready. Run supabase/profiles.sql first.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!availability.available) {
+      setMessage("This nickname is already taken.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          nickname: validation.nickname,
+        },
+        emailRedirectTo: `${window.location.origin}/sign-in`,
+      },
+    });
 
     if (error) {
-      setMessage(error.message);
-    } else {
       setMessage(
-        mode === "sign-in"
-          ? "Signed in."
-          : "Account created. Check your email if confirmation is required.",
+        error.message.includes("duplicate") || error.message.includes("unique")
+          ? "This nickname is already taken."
+          : error.message,
       );
+    } else {
+      if (data.session && isEmailConfirmed(data.session)) {
+        const profileResult = await saveUserProfile(data.session, validation.nickname);
+
+        if (profileResult.error) {
+          setMessage("Account created, but profile setup failed. Try Profile later.");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      setMessage(
+        data.session
+          ? "Account created."
+          : "Account created. Check your email to activate it before signing in.",
+      );
+      setNickname("");
       setPassword("");
     }
 
@@ -157,7 +216,7 @@ export default function SignIn() {
           </div>
 
           <div className="animate-fade-rise-delay liquid-glass rounded-[28px] p-5 sm:p-6">
-            {session ? (
+            {activeSession ? (
               <div>
                 <p className="text-sm uppercase tracking-[0.28em] text-white/35">
                   Signed in
@@ -166,7 +225,7 @@ export default function SignIn() {
                   style={{ fontFamily: "'Instrument Serif', serif" }}
                   className="mt-4 text-4xl font-normal text-white"
                 >
-                  {session.user.user_metadata?.nickname || session.user.email}
+                  {activeSession.user.user_metadata?.nickname || activeSession.user.email}
                 </h2>
                 <p className="mt-5 text-sm leading-7 text-white/52">
                   Your account is active. Open Profile to edit your nickname or

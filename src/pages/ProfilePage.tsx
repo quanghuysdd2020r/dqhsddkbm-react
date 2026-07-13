@@ -3,6 +3,13 @@ import type { Session } from "@supabase/supabase-js";
 import { Link } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
+import {
+  checkNicknameAvailability,
+  getProfile,
+  isEmailConfirmed,
+  saveUserProfile,
+  validateNickname,
+} from "../lib/profiles";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 
 function EyeIcon({ isOpen }: { isOpen: boolean }) {
@@ -44,28 +51,37 @@ export default function Profile() {
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
   const [isProfileSaving, setIsProfileSaving] = useState(false);
   const [isPasswordSaving, setIsPasswordSaving] = useState(false);
+  const activeSession = session && isEmailConfirmed(session) ? session : null;
 
   useEffect(() => {
     if (!supabase) {
       return;
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    async function loadProfile(nextSession: Session | null) {
+      setSession(nextSession);
+
+      if (!nextSession) {
+        setNickname("");
+        return;
+      }
+
+      const { data } = await getProfile(nextSession.user.id);
+
       setNickname(
-        typeof data.session?.user.user_metadata?.nickname === "string"
-          ? data.session.user.user_metadata.nickname
-          : "",
+        data?.nickname ??
+          (typeof nextSession.user.user_metadata?.nickname === "string"
+            ? nextSession.user.user_metadata.nickname
+            : ""),
       );
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      void loadProfile(data.session);
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setNickname(
-        typeof nextSession?.user.user_metadata?.nickname === "string"
-          ? nextSession.user.user_metadata.nickname
-          : "",
-      );
+      void loadProfile(nextSession);
     });
 
     return () => data.subscription.unsubscribe();
@@ -74,7 +90,7 @@ export default function Profile() {
   async function handleNicknameSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!supabase) {
+    if (!supabase || !activeSession) {
       setProfileMessage("Supabase is not configured yet.");
       return;
     }
@@ -82,27 +98,54 @@ export default function Profile() {
     setIsProfileSaving(true);
     setProfileMessage(null);
 
-    const { error } = await supabase.auth.updateUser({
-      data: {
-        nickname: nickname.trim(),
-      },
-    });
+    const validation = validateNickname(nickname);
 
-    if (error) {
-      setProfileMessage(error.message);
-    } else {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      setProfileMessage("Nickname updated.");
+    if (!validation.ok) {
+      setProfileMessage(validation.message);
+      setIsProfileSaving(false);
+      return;
     }
 
+    const availability = await checkNicknameAvailability(
+      validation.nickname,
+      activeSession.user.id,
+    );
+
+    if (availability.error) {
+      setProfileMessage("Profile table is not ready. Run supabase/profiles.sql first.");
+      setIsProfileSaving(false);
+      return;
+    }
+
+    if (!availability.available) {
+      setProfileMessage("This nickname is already taken.");
+      setIsProfileSaving(false);
+      return;
+    }
+
+    const { error } = await saveUserProfile(activeSession, validation.nickname);
+
+    if (error) {
+      setProfileMessage(
+        error.message.includes("duplicate") || error.message.includes("unique")
+          ? "This nickname is already taken."
+          : error.message,
+      );
+      setIsProfileSaving(false);
+      return;
+    }
+
+    const { data } = await supabase.auth.getSession();
+    setSession(data.session);
+    setNickname(validation.nickname);
+    setProfileMessage("Nickname updated.");
     setIsProfileSaving(false);
   }
 
   async function handlePasswordSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!supabase) {
+    if (!supabase || !activeSession) {
       setPasswordMessage("Supabase is not configured yet.");
       return;
     }
@@ -132,7 +175,7 @@ export default function Profile() {
   }
 
   const displayName =
-    nickname.trim() || session?.user.email?.split("@")[0] || "Profile";
+    nickname.trim() || activeSession?.user.email?.split("@")[0] || "Profile";
   const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "U";
 
   return (
@@ -164,7 +207,7 @@ export default function Profile() {
               </p>
             </div>
 
-            {!session ? (
+            {!activeSession ? (
               <div className="liquid-glass rounded-[28px] p-6">
                 <h2
                   style={{ fontFamily: "'Instrument Serif', serif" }}
@@ -215,7 +258,9 @@ export default function Profile() {
                     value={nickname}
                   />
 
-                  <p className="mt-3 text-sm text-white/36">{session.user.email}</p>
+                  <p className="mt-3 text-sm text-white/36">
+                    {activeSession.user.email}
+                  </p>
 
                   <button
                     className="mt-7 rounded-full bg-white px-7 py-3.5 text-sm font-medium text-[#071f2d] transition hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60"
